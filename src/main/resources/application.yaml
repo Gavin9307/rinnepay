@@ -1,0 +1,21 @@
+spring:
+  application:
+    name: rinnepay
+  datasource:
+    url: ${DB_URL:jdbc:postgresql://localhost:5432/RinnePay}
+    username: ${DB_USER:postgres}
+    password: ${DB_PASS:manu}
+  jpa:
+    hibernate:
+      ddl-auto: update
+    show-sql: true
+    properties:
+      hibernate:
+        format_sql: true
+        dialect: org.hibernate.dialect.PostgreSQLDialect
+
+# Environment Variables
+# DB_URL : jdbc:postgresql://localhost:5432/RinnePay
+# DB_USER : postgres
+# DB_PASS : manu
+# payment.order.default-order-expiry-minutes : 30
