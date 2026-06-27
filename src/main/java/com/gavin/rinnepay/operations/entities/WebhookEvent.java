@@ -1,5 +1,6 @@
 package com.gavin.rinnepay.operations.entities;
 
+import com.gavin.rinnepay.common.entities.BaseEntity;
 import com.gavin.rinnepay.common.enums.WebhookEventStatus;
 import jakarta.persistence.*;
 import lombok.*;
@@ -17,7 +18,7 @@ import java.util.UUID;
 @Builder
 @AllArgsConstructor
 @NoArgsConstructor
-public class WebhookEvent {
+public class WebhookEvent extends BaseEntity {
     @Id
     @GeneratedValue(strategy = GenerationType.UUID)
     private UUID id;

@@ -1,5 +1,6 @@
 package com.gavin.rinnepay.operations.entities;
 
+import com.gavin.rinnepay.common.entities.BaseEntity;
 import jakarta.persistence.*;
 import lombok.*;
 
@@ -10,7 +11,7 @@ import lombok.*;
 @Builder
 @AllArgsConstructor
 @NoArgsConstructor
-public class SettlementPayment {
+public class SettlementPayment{
     @EmbeddedId
     private SettlementPaymentId settlementPaymentId;
 

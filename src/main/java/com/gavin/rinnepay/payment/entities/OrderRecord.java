@@ -1,5 +1,6 @@
 package com.gavin.rinnepay.payment.entities;
 
+import com.gavin.rinnepay.common.entities.BaseEntity;
 import com.gavin.rinnepay.common.entities.Money;
 import com.gavin.rinnepay.common.enums.OrderStatus;
 import jakarta.persistence.*;
@@ -12,13 +13,19 @@ import java.util.Map;
 import java.util.UUID;
 
 @Entity
-@Table(name = "order_record")
+@Table(
+        name = "order_record",
+        indexes = {
+                @Index(name = "idx_order_record_order_merchant", columnList = "id, merchant_id"),
+                @Index(name = "idx_order_record_merchant_id", columnList = "merchant_id")
+        }
+)
 @Getter
 @Setter
 @Builder
 @AllArgsConstructor
 @NoArgsConstructor
-public class OrderRecord {
+public class OrderRecord extends BaseEntity {
     @Id
     @GeneratedValue(strategy = GenerationType.UUID)
     private UUID id;

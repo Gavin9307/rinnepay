@@ -1,5 +1,6 @@
 package com.gavin.rinnepay.payment.entities;
 
+import com.gavin.rinnepay.common.entities.BaseEntity;
 import com.gavin.rinnepay.common.entities.Money;
 import com.gavin.rinnepay.common.enums.RefundStatus;
 import jakarta.persistence.*;
@@ -19,7 +20,7 @@ import java.util.UUID;
 @Builder
 @AllArgsConstructor
 @NoArgsConstructor
-public class Refund {
+public class Refund extends BaseEntity {
     @Id
     @GeneratedValue(strategy = GenerationType.UUID)
     private UUID id;

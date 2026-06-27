@@ -1,5 +1,6 @@
 package com.gavin.rinnepay.operations.entities;
 
+import com.gavin.rinnepay.common.entities.BaseEntity;
 import com.gavin.rinnepay.common.entities.Money;
 import com.gavin.rinnepay.common.enums.SettlementStatus;
 import jakarta.persistence.*;
@@ -15,7 +16,7 @@ import java.util.UUID;
 @Builder
 @AllArgsConstructor
 @NoArgsConstructor
-public class Settlement {
+public class Settlement extends BaseEntity {
     @Id
     @GeneratedValue(strategy = GenerationType.UUID)
     private UUID id;

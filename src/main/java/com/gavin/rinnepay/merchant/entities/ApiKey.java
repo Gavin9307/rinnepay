@@ -1,5 +1,6 @@
 package com.gavin.rinnepay.merchant.entities;
 
+import com.gavin.rinnepay.common.entities.BaseEntity;
 import com.gavin.rinnepay.common.enums.BusinessType;
 import com.gavin.rinnepay.common.enums.Environment;
 import com.gavin.rinnepay.common.enums.MerchantStatus;
@@ -10,13 +11,18 @@ import java.time.LocalDateTime;
 import java.util.UUID;
 
 @Entity
-@Table(name = "api_key")
+@Table(
+        name = "api_key",
+        indexes = {
+                @Index(name = "idx_api_key_merchant_env", columnList = "merchant_id, environment, enabled")
+        }
+)
 @Getter
 @Setter
 @Builder
 @AllArgsConstructor
 @NoArgsConstructor
-public class ApiKey {
+public class ApiKey extends BaseEntity {
     @Id
     @GeneratedValue(strategy = GenerationType.UUID)
     private UUID id;

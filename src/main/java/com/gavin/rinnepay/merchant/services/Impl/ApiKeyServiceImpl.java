@@ -7,6 +7,7 @@ import com.gavin.rinnepay.merchant.dtos.responses.ApiKeyCreateResponse;
 import com.gavin.rinnepay.merchant.dtos.responses.ApiKeyResponse;
 import com.gavin.rinnepay.merchant.entities.ApiKey;
 import com.gavin.rinnepay.merchant.entities.Merchant;
+import com.gavin.rinnepay.merchant.mappers.ApiKeyMapper;
 import com.gavin.rinnepay.merchant.repositories.ApiKeyRepository;
 import com.gavin.rinnepay.merchant.repositories.MerchantRepository;
 import com.gavin.rinnepay.merchant.services.ApiKeyService;
@@ -18,7 +19,6 @@ import org.springframework.stereotype.Service;
 import java.time.LocalDateTime;
 import java.util.List;
 import java.util.UUID;
-import java.util.stream.Collectors;
 
 @Service
 @RequiredArgsConstructor
@@ -27,6 +27,7 @@ public class ApiKeyServiceImpl implements ApiKeyService {
 
     private final ApiKeyRepository apiKeyRepository;
     private final MerchantRepository merchantRepository;
+    private final ApiKeyMapper apiKeyMapper;
 
     @Override
     @Transactional
@@ -54,9 +55,7 @@ public class ApiKeyServiceImpl implements ApiKeyService {
             throw new ResourceNotFoundException("merchant", merchantId);
         }
         List<ApiKey> apiKeys = apiKeyRepository.findByMerchant_Id(merchantId);
-        return apiKeys.stream()
-                .map(apiKey -> new ApiKeyResponse(apiKey.getId(),apiKey.getKeyId(),apiKey.getEnvironment(),apiKey.getEnabled(),apiKey.getLastUsedAt(),apiKey.getLastRotatedAt(),apiKey.getGracePeriodExpiresAt(),null))
-                .collect(Collectors.toList());
+        return apiKeyMapper.toResponseList(apiKeys);
     }
 
     @Override
@@ -70,6 +69,9 @@ public class ApiKeyServiceImpl implements ApiKeyService {
     @Transactional
     public ApiKeyCreateResponse rotate(UUID merchantId, UUID apiKeyId){
         ApiKey apiKey = apiKeyRepository.findById(apiKeyId).filter(key -> key.getMerchant().getId().equals(merchantId)).orElseThrow(() -> new ResourceNotFoundException("apiKey", apiKeyId));
+
+        if (!apiKey.getEnabled()) throw new RuntimeException("Cannot rotate a revoked api key.");
+
         String rawSecret = RandomizerUtil.randomBase64(40); // output length will be 54
         apiKey.setPreviousKeySecretHash(apiKey.getKeySecretHash());
         apiKey.setKeySecretHash(rawSecret); // TODO : Encode with BcryptPasswordEncoder

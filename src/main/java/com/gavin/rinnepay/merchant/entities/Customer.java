@@ -1,5 +1,6 @@
 package com.gavin.rinnepay.merchant.entities;
 
+import com.gavin.rinnepay.common.entities.BaseEntity;
 import com.gavin.rinnepay.common.enums.MerchantStatus;
 import jakarta.persistence.*;
 import lombok.*;
@@ -8,13 +9,19 @@ import java.time.LocalDateTime;
 import java.util.UUID;
 
 @Entity
-@Table(name = "customer")
+@Table(
+        name = "customer",
+        indexes = {
+                @Index(name = "idx_customer_merchant", columnList = "merchant_id"),
+                @Index(name = "idx_customer_email", columnList = "email")
+        }
+)
 @Getter
 @Setter
 @Builder
 @AllArgsConstructor
 @NoArgsConstructor
-public class Customer {
+public class Customer extends BaseEntity {
     @Id
     @GeneratedValue(strategy = GenerationType.UUID)
     private UUID id;

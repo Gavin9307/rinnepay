@@ -1,18 +1,24 @@
 package com.gavin.rinnepay.merchant.entities;
 
+import com.gavin.rinnepay.common.entities.BaseEntity;
 import jakarta.persistence.*;
 import lombok.*;
 
 import java.util.UUID;
 
 @Entity
-@Table(name = "merchant_webhook_config")
+@Table(
+        name = "merchant_webhook_config",
+        indexes = {
+                @Index(name = "idx_merchant_webhook_config_merchant_id", columnList = "merchant_id")
+        }
+)
 @Getter
 @Setter
 @Builder
 @AllArgsConstructor
 @NoArgsConstructor
-public class MerchantWebhookConfig {
+public class MerchantWebhookConfig extends BaseEntity {
     @Id
     @GeneratedValue(strategy = GenerationType.UUID)
     private UUID id;

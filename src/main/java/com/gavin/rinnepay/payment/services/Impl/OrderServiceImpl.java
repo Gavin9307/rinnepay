@@ -1,10 +1,18 @@
 package com.gavin.rinnepay.payment.services.Impl;
 
+import com.gavin.rinnepay.common.enums.OrderStatus;
+import com.gavin.rinnepay.common.exception.BusinessRuleViolationException;
 import com.gavin.rinnepay.common.exception.DuplicateResourceException;
+import com.gavin.rinnepay.common.exception.ResourceNotFoundException;
 import com.gavin.rinnepay.payment.dtos.requests.OrderCreateRequest;
-import com.gavin.rinnepay.payment.dtos.responses.OrderCreateResponse;
+import com.gavin.rinnepay.payment.dtos.responses.OrderResponse;
+import com.gavin.rinnepay.payment.dtos.responses.PaymentResponse;
 import com.gavin.rinnepay.payment.entities.OrderRecord;
+import com.gavin.rinnepay.payment.entities.Payment;
+import com.gavin.rinnepay.payment.mappers.OrderMapper;
+import com.gavin.rinnepay.payment.mappers.PaymentMapper;
 import com.gavin.rinnepay.payment.repositories.OrderRepository;
+import com.gavin.rinnepay.payment.repositories.PaymentRepository;
 import com.gavin.rinnepay.payment.services.OrderService;
 import lombok.RequiredArgsConstructor;
 
@@ -14,20 +22,25 @@ import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
 import java.time.LocalDateTime;
+import java.util.List;
 import java.util.UUID;
+import java.util.stream.Collectors;
 
 @Service
 @Slf4j
 @RequiredArgsConstructor
 public class OrderServiceImpl implements OrderService {
     private final OrderRepository orderRepository;
+    private final PaymentRepository paymentRepository;
+    private final PaymentMapper paymentMapper;
+    private final OrderMapper orderMapper;
 
     @Value("${payment.order.default-order-expiry-minutes:30}")
     private int defaultOrderExpiryMinutes;
 
     @Override
     @Transactional
-    public OrderCreateResponse create(UUID merchantId, OrderCreateRequest request){
+    public OrderResponse create(UUID merchantId, OrderCreateRequest request){
         if(request.receipt() != null && orderRepository.existsByReceiptAndMerchantId(request.receipt(), merchantId)){
             throw new DuplicateResourceException("Order with receipt " + request.receipt() + " already exists.", "ORDER_RECEIPT_DUPLICATE");
         }
@@ -40,6 +53,35 @@ public class OrderServiceImpl implements OrderService {
                 .build();
         orderRecord = orderRepository.save(orderRecord);
 
-        return new OrderCreateResponse(orderRecord.getId(),orderRecord.getMerchantId(),orderRecord.getReceipt(),orderRecord.getAmount(),orderRecord.getOrderStatus(),orderRecord.getAttempts(),orderRecord.getNotes(),orderRecord.getExpiresAt(),null);
+        return orderMapper.toResponse(orderRecord);
+    }
+
+    @Override
+    @Transactional
+    public OrderResponse cancel(UUID merchantId, UUID orderId) {
+        OrderRecord order = orderRepository.findByIdAndMerchantId(orderId, merchantId)
+                .orElseThrow(() -> new ResourceNotFoundException("Order", orderId));
+        if (order.getOrderStatus() == OrderStatus.PAID || order.getOrderStatus() == OrderStatus.CANCELED) {
+            throw new BusinessRuleViolationException("Cannot Cancel Order with status: " + order.getOrderStatus().name(), "ORDER_CANNOT_CANCEL");
+        }
+        order.setOrderStatus(OrderStatus.CANCELED);
+        return orderMapper.toResponse(order);
+    }
+    @Override
+    public List<PaymentResponse> listPayments(UUID merchantId, UUID orderId) {
+        OrderRecord order = orderRepository.findByIdAndMerchantId(orderId,merchantId)
+                .orElseThrow(()-> new ResourceNotFoundException("Order",orderId));
+
+        List<Payment> payments = paymentRepository.findByOrder_Id(orderId);
+
+        return paymentMapper.toResponseList(payments);
+    }
+
+    @Override
+    public OrderResponse getById(UUID merchantId, UUID orderId) {
+        OrderRecord order = orderRepository.findByIdAndMerchantId(orderId,merchantId)
+                .orElseThrow(()-> new ResourceNotFoundException("Order",orderId));
+
+        return orderMapper.toResponse(order);
     }
 }

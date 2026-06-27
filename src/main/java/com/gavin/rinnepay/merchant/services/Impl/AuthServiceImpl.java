@@ -7,6 +7,7 @@ import com.gavin.rinnepay.merchant.dtos.requests.MerchantSignupRequest;
 import com.gavin.rinnepay.merchant.dtos.responses.MerchantResponse;
 import com.gavin.rinnepay.merchant.entities.AppUser;
 import com.gavin.rinnepay.merchant.entities.Merchant;
+import com.gavin.rinnepay.merchant.mappers.MerchantMapper;
 import com.gavin.rinnepay.merchant.repositories.AppUserRepository;
 import com.gavin.rinnepay.merchant.repositories.MerchantRepository;
 import com.gavin.rinnepay.merchant.services.AuthService;
@@ -22,6 +23,7 @@ public class AuthServiceImpl implements AuthService {
 
     private final AppUserRepository appUserRepository;
     private final MerchantRepository merchantRepository;
+    private final MerchantMapper merchantMapper;
 
     @Override
     @Transactional
@@ -29,14 +31,8 @@ public class AuthServiceImpl implements AuthService {
         if(merchantRepository.existsByEmail(request.email())){
             throw new DuplicateResourceException("Merchant with email " + request.email() + " already exists.", "DUPLICATE_MERCHANT_EMAIL");
         }
-        Merchant merchant = Merchant.builder()
-                .businessName(request.businessName())
-                .email(request.email())
-                .name(request.name())
-                .businessType(request.businessType())
-                .status(MerchantStatus.PENDING_KYC)
-                .build();
-
+        Merchant merchant = merchantMapper.toEntityFromSignupRequest(request);
+        merchant.setStatus(MerchantStatus.PENDING_KYC);
         merchant = merchantRepository.save(merchant);
 
         AppUser appUser = AppUser.builder()
@@ -48,14 +44,6 @@ public class AuthServiceImpl implements AuthService {
 
         appUserRepository.save(appUser);
 
-        return new MerchantResponse(
-                merchant.getId(),
-                merchant.getName(),
-                merchant.getEmail(),
-                merchant.getBusinessName(),
-                merchant.getBusinessType(),
-                merchant.getContactNumber(),
-                merchant.getStatus()
-        );
+        return merchantMapper.toResponse(merchant);
     }
 }
