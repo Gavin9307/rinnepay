@@ -42,6 +42,9 @@ public class Payment extends BaseEntity {
     @Column(length = 200)
     private String bankReference;
 
+    @Column(length = 200)
+    private String processorReference;
+
     @Column(length = 100)
     private String errorCode;
 
@@ -50,13 +53,15 @@ public class Payment extends BaseEntity {
 
     @JdbcTypeCode(SqlTypes.JSON)
     @Column(columnDefinition = "jsonb")
+    @Builder.Default
     private Map<String,Object> methodDetails = new HashMap<>();
 
     @Enumerated(EnumType.STRING)
-    private PaymentStatus paymentStatus =  PaymentStatus.CREATED;
+    @Builder.Default
+    private PaymentStatus status =  PaymentStatus.CREATED;
 
     @Enumerated(EnumType.STRING)
-    private PaymentMethod paymentMethod;
+    private PaymentMethod method;
 
     private LocalDateTime authorizedAt;
     private LocalDateTime capturedAt;

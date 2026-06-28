@@ -1,8 +1,6 @@
 package com.gavin.rinnepay.merchant.entities;
 
 import com.gavin.rinnepay.common.entities.BaseEntity;
-import com.gavin.rinnepay.common.enums.BusinessType;
-import com.gavin.rinnepay.common.enums.MerchantStatus;
 import com.gavin.rinnepay.common.enums.UserRole;
 import jakarta.persistence.*;
 import lombok.*;

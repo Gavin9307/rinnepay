@@ -11,7 +11,7 @@ import lombok.*;
 @Builder
 @AllArgsConstructor
 @NoArgsConstructor
-public class SettlementPayment{
+public class SettlementPayment extends BaseEntity {
     @EmbeddedId
     private SettlementPaymentId settlementPaymentId;
 
